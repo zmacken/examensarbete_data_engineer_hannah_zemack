@@ -1,1 +1,5 @@
 # examensarbete_data_engineer_hannah_zemack
+
+APIs used: Swedavia API
+SkylinkAPI
+
