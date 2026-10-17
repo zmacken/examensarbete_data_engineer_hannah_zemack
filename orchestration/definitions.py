@@ -31,7 +31,7 @@ job_dlt = dg.define_asset_job(
 
 schedule_dlt = dg.ScheduleDefinition(
     job=job_dlt,
-    cron_schedule="0 10,22 * * *",
+    cron_schedule="0 10,22 * * *", # körs varje dag vid midnatt och mitt på dagen
     execution_timezone="Europe/Stockholm"
     )
 

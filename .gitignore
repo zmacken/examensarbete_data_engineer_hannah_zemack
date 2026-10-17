@@ -228,7 +228,8 @@ __marimo__/
 **/.tmp*/
 
 dagster_home/.env
-data/
 dagster_home/
 .tmp_dagster_home_*
 backups/
+
+data/aircraft-database-complete-2025-08.csv
