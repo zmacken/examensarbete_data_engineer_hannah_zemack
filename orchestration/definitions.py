@@ -1,5 +1,7 @@
+from datetime import datetime, timedelta
 import sys
 from pathlib import Path
+from zoneinfo import ZoneInfo
 import dagster as dg
 import dlt
 from dagster_dlt import DagsterDltResource, dlt_assets
@@ -8,7 +10,7 @@ ROOT = Path(__file__).resolve().parent.parent # absolut sökvög till projektets
 sys.path.insert(0, str(ROOT / "data_extract_load")) # lägger till sökvägen för att kunna importera load_data.py
 from load_data import flights_source #lägger till sökvägen för att kunna importera load_data.py
 
-DB_PATH = ROOT / "data" / "swedavia.duckdb" # absolut sökväg till databasen
+DB_PATH = ROOT / "data" / "swedavia_mindator.duckdb" # absolut sökväg till databasen
 
 
 dlt_resource = DagsterDltResource()
@@ -29,11 +31,14 @@ job_dlt = dg.define_asset_job(
     selection =dg.AssetSelection.keys("dlt_flights_source_flights_resource"),
 )
 
-schedule_dlt = dg.ScheduleDefinition(
-    job=job_dlt,
-    cron_schedule="0 10,22 * * *", # körs varje dag vid midnatt och mitt på dagen
-    execution_timezone="Europe/Stockholm"
-    )
+@dg.schedule(job=job_dlt, cron_schedule="0 10,22 * * *", execution_timezone="Europe/Stockholm")
+def schedule_dlt(context: dg.ScheduleEvaluationContext):
+    scheduled = context.scheduled_execution_time
+    if scheduled is not None:
+        now = datetime.now(ZoneInfo("Europe/Stockholm"))
+        if now - scheduled > timedelta(minutes=10):
+            return dg.SkipReason("Missad körning, hoppar över")
+    return dg.RunRequest()
 
 defs = dg.Definitions(
     assets=[dlt_load],
