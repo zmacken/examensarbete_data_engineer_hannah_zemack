@@ -10,6 +10,7 @@ ROOT = Path(__file__).resolve().parent.parent # absolut sökvög till projektets
 sys.path.insert(0, str(ROOT / "data_extract_load")) # lägger till sökvägen för att kunna importera load_data.py
 from load_data import flights_source #lägger till sökvägen för att kunna importera load_data.py
 
+
 DB_PATH = ROOT / "data" / "swedavia_pappadator.duckdb" # absolut sökväg till databasen
 
 

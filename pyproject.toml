@@ -10,6 +10,7 @@ dependencies = [
     "dagster-dbt>=0.29.25",
     "dagster-dlt>=0.29.25",
     "dagster-webserver>=1.13.25",
+    "dbt-core>=1.12.5",
     "dbt-duckdb>=1.11.0",
     "dlt[duckdb]>=1.31.0",
     "html5lib>=1.1",
