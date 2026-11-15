@@ -1,7 +1,51 @@
 version: 2
 
 sources:
-  - name: raw
-    schema: raw
+  - name: swedavia_raw
+    description: >
+      Rådata från Swedavias flyg-API, laddad med dlt. Tabellen `flights` är
+      denormaliserad (en rad per flyg, hubb och hämtning). Listor i API-svaret
+      har blivit egna tabeller `flights__*` som länkas via _dlt_parent_id.
+    schema: raw  # dlt skriver rådatat hit, separat från våra egna scheman
     tables:
+      # Huvudtabellen: en rad per snapshot
       - name: flights
+        loaded_at_field: fetched_at  # används av `dbt source freshness`
+        columns:
+          - name: _dlt_id  # dlts egen radnyckel, används som länk från barntabellerna
+            data_tests: [unique, not_null]
+          - name: fetched_at
+            data_tests: [not_null]
+
+      # Barntabellerna nedan är listor ur API-svaret som dlt har brutit ut.
+      # Varje rad pekar på sin förälder i flights via _dlt_parent_id.
+      - name: flights__code_share_data
+        columns:
+          - name: _dlt_id
+            data_tests: [unique, not_null]
+          - name: _dlt_parent_id
+            data_tests:
+              - not_null
+              # Säkerställer att det inte finns föräldralösa rader
+              - relationships: {arguments: {to: "source('swedavia_raw', 'flights')", field: _dlt_id}}
+
+      - name: flights__remarks_english
+        columns:
+          - name: _dlt_parent_id
+            data_tests:
+              - not_null
+              - relationships: {arguments: {to: "source('swedavia_raw', 'flights')", field: _dlt_id}}
+
+      - name: flights__remarks_swedish
+        columns:
+          - name: _dlt_parent_id
+            data_tests:
+              - not_null
+              - relationships: {arguments: {to: "source('swedavia_raw', 'flights')", field: _dlt_id}}
+
+      - name: flights__via_destinations
+        columns:
+          - name: _dlt_parent_id
+            data_tests:
+              - not_null
+              - relationships: {arguments: {to: "source('swedavia_raw', 'flights')", field: _dlt_id}}
